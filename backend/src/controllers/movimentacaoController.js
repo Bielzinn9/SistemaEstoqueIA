@@ -63,3 +63,66 @@ export async function movimentarEstoque(req, res) {
     });
   }
 }
+
+export async function listarMovimentacoes(req, res) {
+  try {
+    const movimentacoes = await prisma.movimentacao.findMany({
+      include: {
+        produto: true,
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+
+    return res.json(movimentacoes);
+
+  } catch (erro) {
+    console.error(erro);
+
+    return res.status(500).json({
+      erro: "Erro ao listar movimentações."
+    });
+  }
+}
+
+export async function listarMovimentacoesProduto(req, res) {
+  try {
+    const { id } = req.params;
+
+    const movimentacoes = await prisma.movimentacao.findMany({
+      where: {
+        produtoId: Number(id)
+      },
+      include: {
+        produto: true,
+        usuario: {
+          select: {
+            id: true,
+            nome: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      }
+    });
+
+    return res.json(movimentacoes);
+
+  } catch (erro) {
+    console.error(erro);
+
+    return res.status(500).json({
+      erro: "Erro ao listar movimentações do produto."
+    });
+  }
+}

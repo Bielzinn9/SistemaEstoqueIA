@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { cadastrar } from "../controllers/cadastrar";
+import { cadastrar } from "../controllers/usuarioController.js";
 
 const router = Router();
 
