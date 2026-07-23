@@ -20,7 +20,10 @@ router.get("/produtos/estoque-baixo", autenticar, estoqueBaixo);
 
 router.get("/produtos/:id", autenticar, buscarProduto);
 
+router.put("/produtos/:id", autenticar, atualizarProduto);
+
 router.delete("/produtos/:id", autenticar, excluirProduto);
+
 
 router.get(
   "/produtos/estoque-baixo",

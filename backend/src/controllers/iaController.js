@@ -1,61 +1,99 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import prisma from "../config/prisma.js";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export async function perguntarIA(req, res) {
   try {
     const { pergunta } = req.body;
 
-    if (!pergunta) {
-      return res.status(400).json({
-        erro: "A pergunta é obrigatória."
+    const produtos = await prisma.produto.findMany();
+
+    const texto = pergunta.toLowerCase();
+
+    // Estoque baixo
+    if (
+      texto.includes("estoque baixo") ||
+      texto.includes("reposição") ||
+      texto.includes("comprar")
+    ) {
+      const baixos = produtos.filter((p) => p.quantidade <= 5);
+
+      if (baixos.length === 0) {
+        return res.json({
+          resposta: "Nenhum produto está com estoque baixo."
+        });
+      }
+
+      return res.json({
+        resposta:
+          "Produtos que precisam de reposição:\n\n" +
+          baixos
+            .map((p) => `${p.nome} - Quantidade: ${p.quantidade}`)
+            .join("\n")
       });
     }
 
-    // Busca os produtos do banco
-    const produtos = await prisma.produto.findMany({
-      orderBy: {
-        nome: "asc"
-      }
-    });
+    // Resumo
+    if (
+      texto.includes("resumo") ||
+      texto.includes("estoque")
+    ) {
 
-    // Monta um resumo do estoque
-    const estoque = produtos
-      .map((p) =>
-        `Produto: ${p.nome}
-Categoria: ${p.categoria}
-Quantidade: ${p.quantidade}
-Preço: R$ ${p.preco}`
-      )
-      .join("\n\n");
+      const totalProdutos = produtos.length;
 
-    const prompt = `
-Você é um especialista em controle de estoque.
+      const totalItens = produtos.reduce(
+        (soma, p) => soma + p.quantidade,
+        0
+      );
 
-Analise os dados abaixo e responda em português do Brasil.
+      const valor = produtos.reduce(
+        (soma, p) => soma + p.quantidade * p.preco,
+        0
+      );
 
-=== ESTOQUE ===
+      return res.json({
+        resposta:
+`Resumo do estoque
 
-${estoque}
+• Produtos cadastrados: ${totalProdutos}
 
-=== PERGUNTA ===
+• Total de itens: ${totalItens}
 
-${pergunta}
+• Valor do estoque: R$ ${valor.toFixed(2)}`
+      });
+    }
 
-Responda de forma clara, objetiva e organizada.
-`;
+    // Valor
+    if (texto.includes("valor")) {
 
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash"
-    });
+      const valor = produtos.reduce(
+        (soma, p) => soma + p.quantidade * p.preco,
+        0
+      );
 
-    const result = await model.generateContent(prompt);
+      return res.json({
+        resposta: `O valor total do estoque é R$ ${valor.toFixed(2)}.`
+      });
+    }
 
-    const resposta = result.response.text();
+    // Produtos
+    if (
+      texto.includes("produtos") ||
+      texto.includes("listar")
+    ) {
+
+      return res.json({
+        resposta:
+          produtos
+            .map(
+              (p) =>
+                `${p.nome} (${p.quantidade} unidades)`
+            )
+            .join("\n")
+      });
+    }
 
     return res.json({
-      resposta
+      resposta:
+        "Posso responder perguntas como:\n\n• Faça um resumo do estoque\n• Quais produtos estão com estoque baixo?\n• Qual o valor do estoque?\n• Liste os produtos."
     });
 
   } catch (erro) {
@@ -63,7 +101,7 @@ Responda de forma clara, objetiva e organizada.
     console.error(erro);
 
     return res.status(500).json({
-      erro: "Erro ao consultar a IA."
+      erro: "Erro ao consultar assistente."
     });
 
   }

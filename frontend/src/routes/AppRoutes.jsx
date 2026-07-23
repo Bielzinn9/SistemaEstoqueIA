@@ -4,12 +4,11 @@ import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import Produtos from "../pages/Produtos";
 import Movimentacoes from "../pages/Movimentacoes";
+import AssistenteIA from "../pages/AssistenteIA";
 import PrivateRoute from "./PrivateRoute";
 
 function AppRoutes() {
-
   return (
-
     <BrowserRouter>
 
       <Routes>
@@ -46,12 +45,19 @@ function AppRoutes() {
           }
         />
 
+        <Route
+          path="/ia"
+          element={
+            <PrivateRoute>
+              <AssistenteIA />
+            </PrivateRoute>
+          }
+        />
+
       </Routes>
 
     </BrowserRouter>
-
   );
-
 }
 
 export default AppRoutes;

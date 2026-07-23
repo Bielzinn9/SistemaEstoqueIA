@@ -35,35 +35,33 @@ function Navbar() {
           <ul className="navbar-nav me-auto">
 
             <li className="nav-item">
-
               <Link className="nav-link" to="/dashboard">
                 Dashboard
               </Link>
-
             </li>
 
             <li className="nav-item">
-
               <Link className="nav-link" to="/produtos">
                 Produtos
               </Link>
-
             </li>
 
             <li className="nav-item">
-
               <Link className="nav-link" to="/movimentacoes">
                 Movimentações
               </Link>
+            </li>
 
+            <li className="nav-item">
+              <Link className="nav-link" to="/ia">
+                🤖 Assistente IA
+              </Link>
             </li>
 
           </ul>
 
           <span className="text-white me-3">
-
             👤 {usuario?.nome}
-
           </span>
 
           <button

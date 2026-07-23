@@ -1,22 +1,9 @@
-import express from "express";
+import { Router } from "express";
+import { perguntarIA } from "../controllers/iaController.js";
+import { autenticar } from "../middlewares/authMiddleware.js";
 
-const router = express.Router();
+const router = Router();
 
-router.post("/", async (req, res) => {
-    try {
-        const { mensagem } = req.body;
-
-        res.json({
-            resposta: `Recebi sua mensagem: ${mensagem}`
-        });
-
-    } catch (erro) {
-        console.error(erro);
-
-        res.status(500).json({
-            erro: "Erro na rota da IA"
-        });
-    }
-});
+router.post("/", autenticar, perguntarIA);
 
 export default router;
